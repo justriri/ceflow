@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount } from "wagmi";
-import { celo, celoAlfajores } from "wagmi/chains";
+import { celo, celoSepolia } from "wagmi/chains";
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -9,7 +9,7 @@ function truncateAddress(address: string) {
 
 function networkName(chainId: number | undefined) {
   if (chainId === celo.id) return "Celo Mainnet";
-  if (chainId === celoAlfajores.id) return "Alfajores Testnet";
+  if (chainId === celoSepolia.id) return "Celo Sepolia Testnet";
   return "Unsupported Network";
 }
 

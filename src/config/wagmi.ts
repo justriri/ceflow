@@ -1,5 +1,5 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { celo, celoAlfajores } from "wagmi/chains";
+import { celo, celoSepolia } from "wagmi/chains";
 
 const walletConnectProjectId =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "";
@@ -13,6 +13,6 @@ if (!walletConnectProjectId && process.env.NODE_ENV !== "production") {
 export const wagmiConfig = getDefaultConfig({
   appName: "Celo Stablecoin Yield Agent",
   projectId: walletConnectProjectId,
-  chains: [celo, celoAlfajores],
+  chains: [celo, celoSepolia],
   ssr: true,
 });
