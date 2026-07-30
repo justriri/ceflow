@@ -13,10 +13,27 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const description =
+  "Ceflow is an AI-powered yield agent that helps users discover, optimize, and execute the best stablecoin yield opportunities on Celo.";
+
 export const metadata: Metadata = {
-  title: "Celo Stablecoin Yield Agent",
-  description:
-    "An AI financial agent that helps users understand, optimize, and execute stablecoin strategies on Celo.",
+  title: {
+    default: "Ceflow — The AI Yield Agent for Celo Stablecoins",
+    template: "%s · Ceflow",
+  },
+  description,
+  applicationName: "Ceflow",
+  openGraph: {
+    title: "Ceflow — The AI Yield Agent for Celo Stablecoins",
+    description,
+    siteName: "Ceflow",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ceflow — The AI Yield Agent for Celo Stablecoins",
+    description,
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +46,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col bg-background text-foreground">
         <Providers>{children}</Providers>
       </body>
     </html>

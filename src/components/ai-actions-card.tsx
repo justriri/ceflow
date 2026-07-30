@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronRight, Zap } from "lucide-react";
 import type { AgentAction } from "@/lib/analysis/types";
 import type { StablecoinSymbol } from "@/config/tokens";
 import { DepositAction } from "@/components/deposit-action";
@@ -16,9 +17,9 @@ const TYPE_LABELS: Record<AgentAction["type"], string> = {
 };
 
 function confidenceColor(confidence: number) {
-  if (confidence >= 75) return "bg-emerald-500";
-  if (confidence >= 50) return "bg-amber-500";
-  return "bg-zinc-400";
+  if (confidence >= 75) return "bg-success";
+  if (confidence >= 50) return "bg-risk";
+  return "bg-muted-2";
 }
 
 interface ActionRowProps {
@@ -31,33 +32,34 @@ function ActionRow({ action, availableBalance }: ActionRowProps) {
   const canExecute = action.relatedOpportunityId !== null && action.relatedStablecoin !== null;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-black/5 p-4 dark:border-white/5">
+    <div className="panel-interactive flex flex-col gap-3 rounded-xl border border-border-subtle p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+          <span className="text-[10px] font-semibold tracking-wide text-muted-2 uppercase">
             {TYPE_LABELS[action.type]}
           </span>
-          <span className="text-sm font-semibold text-black dark:text-zinc-50">{action.title}</span>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">{action.explanation}</span>
+          <span className="text-sm font-semibold text-foreground">{action.title}</span>
+          <span className="text-xs text-muted">{action.explanation}</span>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className="text-sm font-semibold text-black dark:text-zinc-50">{action.expectedImpact}</span>
+          <span className="text-sm font-semibold text-foreground tabular-nums">{action.expectedImpact}</span>
           <div className="flex items-center gap-1.5">
             <span className={`h-1.5 w-1.5 rounded-full ${confidenceColor(action.confidence)}`} aria-hidden="true" />
-            <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{action.confidence}% confidence</span>
+            <span className="text-[10px] text-muted">{action.confidence}% confidence</span>
           </div>
         </div>
       </div>
 
       {canExecute && (
-        <div className="border-t border-black/5 pt-3 dark:border-white/5">
+        <div className="border-t border-border-subtle pt-3">
           {!expanded ? (
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="text-xs font-medium text-black underline dark:text-zinc-50"
+              className="group flex items-center gap-1 text-xs font-medium text-accent"
             >
-              Prepare transaction →
+              Prepare transaction
+              <ChevronRight size={13} className="transition-transform group-hover:translate-x-0.5" />
             </button>
           ) : (
             <DepositAction
@@ -81,8 +83,11 @@ export function AIActionsCard({ actions, getAvailableBalance }: AIActionsCardPro
   if (actions.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-zinc-950">
-      <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">AI Actions</span>
+    <div className="panel flex flex-col gap-4 p-6">
+      <div className="flex items-center gap-2">
+        <Zap size={14} className="text-accent" />
+        <span className="text-sm font-semibold text-muted">AI Actions</span>
+      </div>
       <div className="flex flex-col gap-3">
         {actions.map((action) => (
           <ActionRow
@@ -94,7 +99,7 @@ export function AIActionsCard({ actions, getAvailableBalance }: AIActionsCardPro
           />
         ))}
       </div>
-      <p className="text-xs text-zinc-400 dark:text-zinc-500">
+      <p className="text-xs text-muted-2">
         Preparing a transaction only builds it for your review — nothing is signed or sent until you
         approve it in your wallet.
       </p>

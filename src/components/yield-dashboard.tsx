@@ -2,9 +2,9 @@
 
 import { useCallback, useState } from "react";
 import { useAccount } from "wagmi";
+import { Sparkles, TrendingUp, Wallet, History, SlidersHorizontal, Coins } from "lucide-react";
 import { useCeloBalances } from "@/hooks/use-celo-balances";
 import { useRecommendations } from "@/hooks/use-recommendations";
-import { truncateAddress, networkName } from "@/lib/celo-format";
 import { BalanceRow } from "@/components/balance-row";
 import { PreferencesForm } from "@/components/preferences-form";
 import { RecommendationGrid } from "@/components/recommendation-grid";
@@ -14,19 +14,20 @@ import { ActivePositionsSection } from "@/components/active-positions-section";
 import { HistoryTab } from "@/components/history-tab";
 import { AccessGateBoundary } from "@/components/access-gate-boundary";
 import { AgentTab } from "@/components/agent-tab";
+import { EmptyState } from "@/components/empty-state";
 import { DEFAULT_PREFERENCES } from "@/types/preferences";
 
 type Tab = "agent" | "recommendations" | "positions" | "history";
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "agent", label: "Agent" },
-  { id: "recommendations", label: "Recommendations" },
-  { id: "positions", label: "Active Positions" },
-  { id: "history", label: "History" },
+const TABS: { id: Tab; label: string; icon: typeof Sparkles }[] = [
+  { id: "agent", label: "Agent", icon: Sparkles },
+  { id: "recommendations", label: "Recommendations", icon: TrendingUp },
+  { id: "positions", label: "Active Positions", icon: Wallet },
+  { id: "history", label: "History", icon: History },
 ];
 
 export function YieldDashboard() {
-  const { address, isConnected, chainId } = useAccount();
+  const { address, isConnected } = useAccount();
   const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
   const [tab, setTab] = useState<Tab>("agent");
 
@@ -51,34 +52,30 @@ export function YieldDashboard() {
 
   if (!isConnected || !address) {
     return (
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">
-        Connect your wallet to see yield recommendations.
-      </p>
+      <div className="flex flex-1 items-center justify-center py-16">
+        <EmptyState
+          icon={Wallet}
+          title="Connect your wallet to get started"
+          description="Use the button in the top right to connect — your balances and personalized yield recommendations will appear here."
+        />
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex w-full max-w-2xl flex-col gap-6">
-        <div className="flex flex-col gap-1">
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">
-            Connected Address
-          </span>
-          <span className="font-mono text-base text-black dark:text-zinc-50">
-            {truncateAddress(address)}
-          </span>
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">
-            {networkName(chainId)}
-          </span>
-        </div>
+    <div className="animate-fade-up flex flex-col gap-8">
+      {!isSupportedChain && <SwitchNetworkButton />}
 
-        {!isSupportedChain && <SwitchNetworkButton />}
+      {isSupportedChain && (
+        <>
+          <PortfolioValue />
 
-        {isSupportedChain && (
-          <>
-            <PortfolioValue />
-
-            <div className="flex flex-col rounded-2xl border border-black/10 bg-white p-4 dark:border-white/10 dark:bg-zinc-950">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="panel flex flex-col p-5">
+              <div className="mb-1 flex items-center gap-2">
+                <Coins size={15} className="text-muted" />
+                <span className="text-sm font-semibold text-foreground">Balances</span>
+              </div>
               <BalanceRow
                 label="CELO"
                 formatted={celoBalance.formatted}
@@ -98,67 +95,69 @@ export function YieldDashboard() {
               ))}
             </div>
 
-            <div className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-white p-4 dark:border-white/10 dark:bg-zinc-950">
-              <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                Your preferences
-              </span>
+            <div className="panel flex flex-col gap-4 p-5">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal size={15} className="text-muted" />
+                <span className="text-sm font-semibold text-foreground">Your preferences</span>
+              </div>
               <PreferencesForm preferences={preferences} onChange={setPreferences} />
             </div>
-
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              APY figures marked &quot;live&quot; are fetched from DefiLlama; the
-              rest are estimates from the last time this app was updated.
-              Portfolio value uses live CELO/EUR/BRL prices where available,
-              otherwise a rough fallback. Always confirm current rates on the
-              protocol&apos;s own site before relying on them.
-            </p>
-          </>
-        )}
-      </div>
-
-      {isSupportedChain && (
-        <div className="flex flex-col gap-6">
-          <div className="flex gap-1 border-b border-black/10 dark:border-white/10">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTab(t.id)}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  tab === t.id
-                    ? "border-b-2 border-black text-black dark:border-white dark:text-zinc-50"
-                    : "text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
           </div>
 
-          {tab === "agent" && <AgentTab preferences={preferences} />}
+          <p className="text-xs text-muted-2">
+            APY figures marked &quot;live&quot; are fetched from DefiLlama; the rest are estimates
+            from the last time this app was updated. Portfolio value uses live CELO/EUR/BRL prices
+            where available, otherwise a rough fallback. Always confirm current rates on the
+            protocol&apos;s own site before relying on them.
+          </p>
 
-          {tab === "recommendations" && (
-            <AccessGateBoundary resourceId="yield-recommendations">
-              {top === null ? (
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  No opportunity matches your current preferences. Try lowering
-                  your minimum APY or risk tolerance.
-                </p>
-              ) : (
-                <RecommendationGrid
-                  top={top}
-                  alternatives={alternatives}
-                  stablecoinSymbol={preferences.selectedStablecoin}
-                  availableBalance={selectedBalance}
-                />
+          <div className="flex flex-col gap-6">
+            <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-xl border border-border-subtle bg-surface p-1">
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTab(t.id)}
+                  className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                    tab === t.id
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted hover:bg-surface-2 hover:text-foreground"
+                  }`}
+                >
+                  <t.icon size={15} />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            <div key={tab} className="animate-fade-up">
+              {tab === "agent" && <AgentTab preferences={preferences} />}
+
+              {tab === "recommendations" && (
+                <AccessGateBoundary resourceId="yield-recommendations">
+                  {top === null ? (
+                    <EmptyState
+                      icon={TrendingUp}
+                      title="No matching opportunities"
+                      description="No opportunity matches your current preferences. Try lowering your minimum APY or risk tolerance."
+                    />
+                  ) : (
+                    <RecommendationGrid
+                      top={top}
+                      alternatives={alternatives}
+                      stablecoinSymbol={preferences.selectedStablecoin}
+                      availableBalance={selectedBalance}
+                    />
+                  )}
+                </AccessGateBoundary>
               )}
-            </AccessGateBoundary>
-          )}
 
-          {tab === "positions" && <ActivePositionsSection />}
+              {tab === "positions" && <ActivePositionsSection />}
 
-          {tab === "history" && <HistoryTab />}
-        </div>
+              {tab === "history" && <HistoryTab />}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

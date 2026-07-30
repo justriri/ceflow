@@ -1,3 +1,4 @@
+import { Loader2, CircleCheck, CircleX, ExternalLink } from "lucide-react";
 import type { TransactionPhase, TransactionStep } from "@/lib/transactions/types";
 
 const PHASE_LABELS: Record<TransactionPhase, string> = {
@@ -31,21 +32,12 @@ export function TransactionStatus({
   const isBusy = phase === "preparing" || phase === "awaiting-signature" || phase === "pending";
 
   return (
-    <div className="flex flex-col gap-1 rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm dark:border-white/10 dark:bg-zinc-900">
+    <div className="animate-fade-in flex flex-col gap-1.5 rounded-lg border border-border-subtle bg-surface-2 p-3 text-sm">
       <div className="flex items-center gap-2">
-        {isBusy && (
-          <span
-            className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent"
-            aria-hidden="true"
-          />
-        )}
-        {phase === "confirmed" && (
-          <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-        )}
-        {phase === "failed" && (
-          <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
-        )}
-        <span className="text-zinc-700 dark:text-zinc-300">
+        {isBusy && <Loader2 size={13} className="animate-spin text-accent" aria-hidden="true" />}
+        {phase === "confirmed" && <CircleCheck size={14} className="text-success" aria-hidden="true" />}
+        {phase === "failed" && <CircleX size={14} className="text-danger" aria-hidden="true" />}
+        <span className="text-foreground">
           {stepPrefix(step)}
           {PHASE_LABELS[phase]}
         </span>
@@ -55,12 +47,13 @@ export function TransactionStatus({
           href={`https://celoscan.io/tx/${txHash}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-mono text-xs text-zinc-500 underline dark:text-zinc-400"
+          className="flex w-fit items-center gap-1 font-mono text-xs text-muted underline transition-colors hover:text-foreground"
         >
           {txHash.slice(0, 10)}…{txHash.slice(-8)}
+          <ExternalLink size={10} />
         </a>
       )}
-      {error && <span className="text-xs text-red-600 dark:text-red-400">{error}</span>}
+      {error && <span className="text-xs text-danger">{error}</span>}
     </div>
   );
 }

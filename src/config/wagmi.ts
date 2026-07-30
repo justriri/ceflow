@@ -11,7 +11,7 @@ if (!walletConnectProjectId && process.env.NODE_ENV !== "production") {
 }
 
 export const wagmiConfig = getDefaultConfig({
-  appName: "Celo Stablecoin Yield Agent",
+  appName: "Ceflow",
   projectId: walletConnectProjectId,
   chains: [celo, celoSepolia],
   ssr: true,

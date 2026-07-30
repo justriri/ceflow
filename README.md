@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ceflow
 
-## Getting Started
+**The AI Yield Agent for Celo Stablecoins.**
 
-First, run the development server:
+Ceflow is an AI-powered yield agent that helps users discover, optimize, and execute the best
+stablecoin yield opportunities on Celo. Connect a wallet, and Ceflow reads live balances and
+positions, ranks real DeFi protocols against your risk profile, explains its reasoning in plain
+language, and prepares transactions for you to review — but it never signs anything on its own.
+Every deposit, withdrawal, and rebalance ends at your wallet's own confirmation screen.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Overview
+
+- **Analyze** — a snapshot of your wallet and active positions across every stablecoin you hold,
+  not just the one currently selected in the UI.
+- **Optimize** — a proposed reallocation with reasoning and an estimated yield improvement, built
+  from the same scoring engine that powers every recommendation in the app.
+- **Execute** — transactions are prepared, never auto-signed. Wallet approval is always the final
+  step.
+
+Ceflow presents itself a few different ways depending on context — as an AI-powered portfolio
+optimizer, as intelligent yield management for Celo, or simply as your autonomous yield assistant.
+It's the same agent throughout.
+
+## Features
+
+- **AI Portfolio Analysis** — a conversational read on positions, idle capital, diversification,
+  and risk, generated fresh on every analysis run.
+- **Agent Insights** — effective APY, estimated yearly earnings, idle capital, risk warnings, and
+  protocol exposure, surfaced automatically.
+- **AI Actions** — concrete recommendations (deposit idle funds, switch protocols, diversify, or
+  hold) each with a confidence score and expected impact.
+- **Portfolio Health Score** — a 0–100 score from diversification, protocol safety, liquidity,
+  APY, concentration risk, and idle capital, with specific improvement suggestions.
+- **Live Yield Discovery** — real-time APYs pulled from DefiLlama and ranked per stablecoin for
+  your risk tolerance.
+- **AI Premium** (gated via x402 — see below):
+  - **Optimize Portfolio** — a full reallocation plan with before/after effective APY and
+    prepared withdraw + deposit transactions per move.
+  - **Scenario Simulator** — "what if I moved $X into USDM?" as a read-only projection.
+  - **Risk Analysis** — a safety score built from protocol risk levels, trust scores, and
+    concentration.
+  - **Yield Forecasting** — 30/90/365-day earnings projections at today's blended APY.
+  - **Cross-Protocol Comparison** — every ranked opportunity for your held assets, side by side.
+  - **Automated Monitoring & AI Alerts** — on-demand and interval checks for meaningful APY
+    changes while the panel is open.
+
+## Architecture
+
+Built with Next.js 16 (App Router, Turbopack), TypeScript, Tailwind CSS v4, and React 19, on top
+of wagmi, viem, and RainbowKit for wallet connectivity to Celo Mainnet and Celo Sepolia.
+
+```
+src/
+  app/                Routes: marketing landing page (/) and the dashboard (/app)
+  components/         UI, split into dashboard, landing, and shared primitives
+  lib/
+    scoring/           The ranking engine — filters, weights, reasons, scoring (never touched
+                        by the AI layer; every recommendation traces back to this)
+    analysis/          The AI layer — portfolio snapshot, narrative, insights, actions, health
+                        score, optimization plan, risk analysis, forecasting, scenario simulation
+    monitoring/        Pluggable change-detection sources (APY changes today; the interface is
+                        designed for more once the infrastructure exists to support them)
+    payments/          The x402 access-gate seam (see below)
+    transactions/       Per-protocol adapters (Aave V3, Moola Market) behind one execution interface
+    protocols/         The static registry of yield opportunities Ceflow ranks
+    positions/         On-chain position reading + locally tracked transaction history
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Live data — pool APYs (DefiLlama), CELO/USD price, and EUR/BRL forex rates — is merged into the
+static protocol registry on every request via `src/app/api/live-data`, so a rate marked "live" in
+the UI really is live.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## AI capabilities
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Ceflow's reasoning is **deterministic and template-based, not a live LLM call** — there is no
+external AI provider wired into this app. Every explanation is generated by comparing real numbers
+(score, APY, concentration, risk level, trust score) computed from your actual wallet and position
+data, then rendering that comparison as plain-language sentences. This is a deliberate choice: it
+means every claim the agent makes is traceable back to the scoring engine and cannot hallucinate a
+number that isn't real. The AI-assisted execution flow is always: **Analyze → Explain → Prepare
+Transaction → Review → Wallet Signature → Execute** — the agent never signs on your behalf.
 
-## Learn More
+## x402 Premium
 
-To learn more about Next.js, take a look at the following resources:
+The AI Premium section (Optimize Portfolio, Scenario Simulator, Risk Analysis, Yield Forecasting,
+Cross-Protocol Comparison, and AI Monitoring) is gated behind an `AccessGate` interface built for
+the [x402](https://x402.org) payment protocol. Two implementations exist:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `freeAccessGate` — always grants access. **This is what's active by default.**
+- `createX402AccessGate` — a real gate built against [thirdweb](https://thirdweb.com)'s x402
+  facilitator, which settles in USDC or USDT on Celo (Celo's own native facilitator only supports
+  those two assets today — not USDM — so thirdweb's is the one actually wired up here).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Activating real payments is a business decision, not a technical one: set
+`THIRDWEB_SECRET_KEY`, `X402_PAYOUT_ADDRESS`, and `X402_PRICE_USD` (see `.env.local.example`), then
+swap the export in `src/lib/payments/index.ts`. Every consumer (`useAccessGate`,
+`AccessGateBoundary`) already reads through that one seam, so nothing else changes. Deposits,
+withdrawals, and viewing your own portfolio are never gated — only the deeper AI tools are.
 
-## Deploy on Vercel
+## Installation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+git clone https://github.com/justriri/celo-stablecoin-yield-agent.git
+cd celo-stablecoin-yield-agent
+npm install
+cp .env.local.example .env.local
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Add a free [WalletConnect](https://cloud.reown.com) project ID to `.env.local` —
+`NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` is the only variable required to run the app. Everything
+under the x402 section of `.env.local.example` is optional.
+
+## Development
+
+```bash
+npm run dev      # start the dev server (Turbopack)
+npm run lint      # ESLint
+npm run build     # production build
+npm run start     # serve the production build
+```
+
+Open [http://localhost:3000](http://localhost:3000) for the landing page, or
+[http://localhost:3000/app](http://localhost:3000/app) to go straight to the dashboard.
+
+## Roadmap
+
+- Activate x402 payment collection for AI Premium once a production thirdweb account and payout
+  address are set up.
+- Add more executable protocols beyond Aave V3 and Moola Market (several more are already ranked,
+  just not yet wired to a transaction adapter).
+- An optional live-LLM reasoning mode alongside the deterministic engine, clearly labeled as such.
+- A real scheduled/background version of Automated Monitoring, once there's server infrastructure
+  to run it outside an open browser tab.
+- Security review ahead of mainnet use with real user funds beyond testnet/personal use.
+
+---
+
+*Built for the Celo Hackathon.*

@@ -32,21 +32,17 @@ export function PortfolioValue() {
   const isBalanceLoading = celoBalance.isLoading || stablecoins.some((s) => s.isLoading);
 
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-sm text-zinc-500 dark:text-zinc-400">
-        Total portfolio value
-      </span>
+    <div className="flex flex-col gap-2">
+      <span className="text-sm text-muted">Total portfolio value</span>
       {isBalanceLoading ? (
-        <span className="h-9 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
+        <span className="skeleton h-10 w-40" />
       ) : (
-        <span className="text-3xl font-semibold text-black dark:text-zinc-50">
+        <span className="text-4xl font-semibold tracking-tight text-foreground tabular-nums sm:text-5xl">
           ${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
         </span>
       )}
       {isPriceLoading && (
-        <span className="text-xs text-zinc-400 dark:text-zinc-500">
-          Using fallback prices while live rates load…
-        </span>
+        <span className="text-xs text-muted-2">Using fallback prices while live rates load…</span>
       )}
     </div>
   );

@@ -1,7 +1,9 @@
 "use client";
 
 import { useAccount } from "wagmi";
+import { History as HistoryIcon, ExternalLink } from "lucide-react";
 import { useTransactionHistory } from "@/hooks/use-transaction-history";
+import { EmptyState } from "@/components/empty-state";
 
 const ACTION_LABELS: Record<string, string> = {
   deposit: "Deposit",
@@ -10,9 +12,9 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
-  confirmed: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400",
-  failed: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400",
+  pending: "bg-surface-2 text-muted",
+  confirmed: "bg-success-soft text-success",
+  failed: "bg-danger-soft text-danger",
 };
 
 export function HistoryTab() {
@@ -25,22 +27,23 @@ export function HistoryTab() {
 
   if (mine.length === 0) {
     return (
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">
-        No transaction history yet. Deposits, withdrawals, and claims made through this app will
-        show up here — this device only, not synced from elsewhere.
-      </p>
+      <EmptyState
+        icon={HistoryIcon}
+        title="No transaction history yet"
+        description="Deposits, withdrawals, and claims made through this app will show up here — this device only, not synced from elsewhere."
+      />
     );
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <p className="text-xs text-zinc-400 dark:text-zinc-500">
+    <div className="animate-fade-up flex flex-col gap-3">
+      <p className="text-xs text-muted-2">
         Only shows activity made through this app on this device — there&apos;s no indexer, so it
         can&apos;t see deposits made directly on a protocol&apos;s own site or from another device.
       </p>
-      <div className="overflow-x-auto rounded-2xl border border-black/10 dark:border-white/10">
+      <div className="panel overflow-x-auto p-0">
         <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="border-b border-black/10 text-xs text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+          <thead className="border-b border-border-subtle text-xs text-muted">
             <tr>
               <th className="px-4 py-3 font-medium">Action</th>
               <th className="px-4 py-3 font-medium">Protocol</th>
@@ -54,20 +57,16 @@ export function HistoryTab() {
             {mine.map((record) => (
               <tr
                 key={record.id}
-                className="border-b border-black/5 last:border-0 dark:border-white/5"
+                className="border-b border-border-subtle transition-colors last:border-0 hover:bg-surface-2"
               >
-                <td className="px-4 py-3 font-medium text-black dark:text-zinc-50">
+                <td className="px-4 py-3 font-medium text-foreground">
                   {ACTION_LABELS[record.action] ?? record.action}
                 </td>
-                <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
-                  {record.protocolName}
-                </td>
-                <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3 text-muted">{record.protocolName}</td>
+                <td className="px-4 py-3 text-muted tabular-nums">
                   {record.amount ? `${record.amount} ${record.stablecoinSymbol ?? ""}` : "—"}
                 </td>
-                <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
-                  {new Date(record.timestamp).toLocaleString()}
-                </td>
+                <td className="px-4 py-3 text-muted">{new Date(record.timestamp).toLocaleString()}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[record.status]}`}
@@ -81,12 +80,13 @@ export function HistoryTab() {
                       href={`https://celoscan.io/tx/${record.txHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono text-xs text-zinc-500 underline dark:text-zinc-400"
+                      className="flex w-fit items-center gap-1 font-mono text-xs text-muted underline transition-colors hover:text-foreground"
                     >
                       {record.txHash.slice(0, 8)}…{record.txHash.slice(-6)}
+                      <ExternalLink size={10} />
                     </a>
                   ) : (
-                    <span className="text-xs text-zinc-400 dark:text-zinc-500">—</span>
+                    <span className="text-xs text-muted-2">—</span>
                   )}
                 </td>
               </tr>

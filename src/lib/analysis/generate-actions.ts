@@ -3,8 +3,14 @@ import { calculateConcentration } from "@/lib/analysis/diversification";
 import { getRankedFor } from "@/lib/analysis/snapshot-helpers";
 import { formatUsd } from "@/lib/analysis/format";
 
-/** How much higher a competing score needs to be before "switch" is worth suggesting — avoids churn over marginal differences. */
-const SWITCH_SCORE_MARGIN = 1.15;
+/**
+ * How much higher a competing score needs to be before "switch" is worth
+ * suggesting — avoids churn over marginal differences. Exported so
+ * optimize-portfolio.ts uses the exact same bar; the premium "Optimize
+ * Portfolio" plan must never propose a move the free AI Actions card
+ * wouldn't also flag as a switch, or the two would silently disagree.
+ */
+export const SWITCH_SCORE_MARGIN = 1.15;
 
 export function generateActions(snapshot: PortfolioSnapshot): AgentAction[] {
   const actions: AgentAction[] = [];

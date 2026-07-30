@@ -1,3 +1,4 @@
+import { TrendingUp } from "lucide-react";
 import type { Position } from "@/lib/positions/types";
 
 function fmt(value: number) {
@@ -29,27 +30,32 @@ export function EarningsTracker({ position }: EarningsTrackerProps) {
   } = position;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900">
-      <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+    <div className="flex flex-col gap-3 rounded-xl bg-surface-2 p-4">
+      <span className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted uppercase">
+        <TrendingUp size={12} className="text-success" />
         Yield earned
       </span>
 
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div className="flex flex-col">
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">Principal</span>
-          <span className="font-medium text-black dark:text-zinc-50">
+          <span className="text-xs text-muted">Principal</span>
+          <span className="font-medium text-foreground tabular-nums">
             {trackedPrincipal !== null ? `${fmt(trackedPrincipal)} ${stablecoinSymbol}` : "Not tracked"}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">Current value (live)</span>
-          <span className="font-medium text-black dark:text-zinc-50">
+          <span className="text-xs text-muted">Current value (live)</span>
+          <span className="font-medium text-foreground tabular-nums">
             {fmt(currentAmount)} {stablecoinSymbol}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">Earned since deposit (est.)</span>
-          <span className="font-medium text-black dark:text-zinc-50">
+          <span className="text-xs text-muted">Earned since deposit (est.)</span>
+          <span
+            className={`font-medium tabular-nums ${
+              earningsSinceDeposit !== null && earningsSinceDeposit >= 0 ? "text-success" : "text-foreground"
+            }`}
+          >
             {earningsSinceDeposit !== null
               ? `${earningsSinceDeposit >= 0 ? "+" : ""}${fmt(earningsSinceDeposit)} ${stablecoinSymbol}`
               : "Unknown — predates this app"}
@@ -57,22 +63,22 @@ export function EarningsTracker({ position }: EarningsTrackerProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 border-t border-black/5 pt-3 dark:border-white/5">
+      <div className="grid grid-cols-3 gap-2 border-t border-border-subtle pt-3">
         <div className="flex flex-col">
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">Daily (est.)</span>
-          <span className="text-sm font-medium text-black dark:text-zinc-50">
+          <span className="text-xs text-muted">Daily (est.)</span>
+          <span className="text-sm font-medium text-foreground tabular-nums">
             {fmt(dailyEarningsEstimate)}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">Monthly (est.)</span>
-          <span className="text-sm font-medium text-black dark:text-zinc-50">
+          <span className="text-xs text-muted">Monthly (est.)</span>
+          <span className="text-sm font-medium text-foreground tabular-nums">
             {fmt(monthlyEarningsEstimate)}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">Yearly (est.)</span>
-          <span className="text-sm font-medium text-black dark:text-zinc-50">
+          <span className="text-xs text-muted">Yearly (est.)</span>
+          <span className="text-sm font-medium text-foreground tabular-nums">
             {fmt(yearlyEarningsEstimate)}
           </span>
         </div>

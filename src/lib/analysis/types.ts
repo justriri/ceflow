@@ -1,6 +1,7 @@
 import type { StablecoinSymbol } from "@/config/tokens";
 import type { Position } from "@/lib/positions/types";
 import type { ScoredOpportunity } from "@/lib/scoring/types";
+import type { RiskLevel } from "@/types/yield";
 
 export interface IdleBalance {
   symbol: StablecoinSymbol;
@@ -92,4 +93,76 @@ export interface PortfolioAnalysis {
   insights: Insight[];
   actions: AgentAction[];
   healthScore: PortfolioHealthScore;
+}
+
+/**
+ * One proposed reallocation within an OptimizationPlan. `fromOpportunityId`
+ * is null when the source is idle wallet capital (nothing to withdraw —
+ * only a deposit needs preparing); otherwise the move requires withdrawing
+ * from the current position before depositing into the proposed one.
+ */
+export interface AllocationMove {
+  id: string;
+  fromOpportunityId: string | null;
+  fromProtocolName: string | null;
+  toOpportunityId: string;
+  toProtocolName: string;
+  stablecoinSymbol: StablecoinSymbol;
+  amount: number;
+  amountUsd: number;
+  reasoning: string;
+  currentApy: number;
+  projectedApy: number;
+  estimatedAnnualImprovement: number;
+}
+
+export interface OptimizationPlan {
+  hasChanges: boolean;
+  summary: string;
+  currentEffectiveApy: number;
+  projectedEffectiveApy: number;
+  estimatedAnnualImprovement: number;
+  moves: AllocationMove[];
+}
+
+export interface RiskBreakdownEntry {
+  level: RiskLevel;
+  usdValue: number;
+  /** Share (0-1) of deployed value at this risk level. */
+  share: number;
+  protocols: string[];
+}
+
+export interface RiskAnalysis {
+  /** 0-100, higher = safer. Value-weighted across deployed positions only. */
+  safetyScore: number;
+  narrative: string;
+  breakdown: RiskBreakdownEntry[];
+  warnings: string[];
+}
+
+export interface YieldForecastPoint {
+  days: number;
+  label: string;
+  projectedEarnings: number;
+  projectedPortfolioValue: number;
+}
+
+export interface YieldForecast {
+  currentEffectiveApy: number;
+  assumptionNote: string;
+  points: YieldForecastPoint[];
+}
+
+export interface ScenarioResult {
+  symbol: StablecoinSymbol;
+  amount: number;
+  amountUsd: number;
+  targetOpportunityId: string;
+  targetProtocolName: string;
+  projectedApy: number;
+  currentEffectiveApy: number;
+  projectedEffectiveApyAfterMove: number;
+  additionalAnnualEarnings: number;
+  reasoning: string;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Lock } from "lucide-react";
 import { useAccessGate } from "@/hooks/use-access-gate";
 
 interface AccessGateBoundaryProps {
@@ -9,23 +10,29 @@ interface AccessGateBoundaryProps {
 }
 
 /**
- * Wraps a priced resource (currently just "generating recommendations" —
- * deliberately NOT wrapped around deposit/withdraw, since execution should
- * never be metered the same way analysis is). With the default free gate
- * this renders `children` immediately; this component is the intended
- * mount point for a future paywall UI, not a functional paywall today.
+ * Wraps a priced resource (currently "generating recommendations" and
+ * "ai-premium" — deliberately NOT wrapped around deposit/withdraw, since
+ * execution should never be metered the same way analysis is). With the
+ * default free gate this renders `children` immediately; this component is
+ * the intended mount point for a future paywall UI, not a functional
+ * paywall today.
  */
 export function AccessGateBoundary({ resourceId, children }: AccessGateBoundaryProps) {
   const { isGranted, isChecking, result } = useAccessGate(resourceId);
 
-  if (isChecking) return null;
+  if (isChecking) {
+    return <div className="skeleton h-32 w-full" role="status" aria-label="Checking access" />;
+  }
 
   if (!isGranted && result?.requirement) {
     const { priceUsd, asset, description } = result.requirement;
     return (
-      <div className="flex flex-col gap-2 rounded-2xl border border-black/10 bg-white p-6 text-sm dark:border-white/10 dark:bg-zinc-950">
-        <span className="font-medium text-black dark:text-zinc-50">Payment required</span>
-        <span className="text-zinc-500 dark:text-zinc-400">
+      <div className="panel flex flex-col items-center gap-3 p-10 text-center">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-soft">
+          <Lock size={18} className="text-accent" strokeWidth={1.75} />
+        </div>
+        <span className="text-sm font-semibold text-foreground">Payment required</span>
+        <span className="max-w-sm text-sm text-muted">
           {description} — ${priceUsd} {asset}
         </span>
       </div>

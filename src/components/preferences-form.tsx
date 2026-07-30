@@ -7,9 +7,9 @@ import { STABLECOINS } from "@/config/tokens";
 
 const RISK_OPTIONS: RiskLevel[] = ["low", "medium", "high"];
 
-const inputClass =
-  "rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:ring-white/20";
-const labelClass = "text-sm text-zinc-600 dark:text-zinc-400";
+const inputClass = "input-field px-3 py-2 text-sm text-foreground";
+const labelClass = "text-xs font-medium text-muted";
+const checkboxClass = "h-4 w-4 accent-accent";
 
 interface PreferencesFormProps {
   preferences: UserPreferences;
@@ -74,6 +74,7 @@ export function PreferencesForm({ preferences, onChange }: PreferencesFormProps)
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
+            className={checkboxClass}
             checked={preferences.requireInstantWithdrawal}
             onChange={(e) =>
               onChange({ ...preferences, requireInstantWithdrawal: e.target.checked })
@@ -84,6 +85,7 @@ export function PreferencesForm({ preferences, onChange }: PreferencesFormProps)
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
+            className={checkboxClass}
             checked={preferences.allowLpPositions}
             onChange={(e) =>
               onChange({ ...preferences, allowLpPositions: e.target.checked })
