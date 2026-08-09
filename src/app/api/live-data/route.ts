@@ -4,7 +4,7 @@ import { YIELD_OPPORTUNITIES } from "@/lib/protocols";
 export interface LiveDataResponse {
   poolApys: Record<string, number>;
   celoUsdPrice: number | null;
-  forexRates: { eurUsd: number; brlUsd: number } | null;
+  forexRates: { eurUsd: number; brlUsd: number; ngnUsd: number } | null;
   fetchedAt: string;
 }
 
@@ -51,7 +51,7 @@ async function fetchCeloPrice(): Promise<number | null> {
   return typeof price === "number" ? price : null;
 }
 
-async function fetchForexRates(): Promise<{ eurUsd: number; brlUsd: number } | null> {
+async function fetchForexRates(): Promise<{ eurUsd: number; brlUsd: number; ngnUsd: number } | null> {
   const res = await fetch("https://open.er-api.com/v6/latest/USD", {
     next: { revalidate: 3600 },
   });
@@ -59,10 +59,18 @@ async function fetchForexRates(): Promise<{ eurUsd: number; brlUsd: number } | n
   const data = await res.json();
   const eur = data?.rates?.EUR;
   const brl = data?.rates?.BRL;
-  if (typeof eur !== "number" || typeof brl !== "number" || eur === 0 || brl === 0) {
+  const ngn = data?.rates?.NGN;
+  if (
+    typeof eur !== "number" ||
+    typeof brl !== "number" ||
+    typeof ngn !== "number" ||
+    eur === 0 ||
+    brl === 0 ||
+    ngn === 0
+  ) {
     return null;
   }
-  return { eurUsd: 1 / eur, brlUsd: 1 / brl };
+  return { eurUsd: 1 / eur, brlUsd: 1 / brl, ngnUsd: 1 / ngn };
 }
 
 export async function GET() {

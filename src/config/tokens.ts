@@ -1,7 +1,7 @@
 import { celo, celoSepolia } from "wagmi/chains";
 import type { Address } from "viem";
 
-export type StablecoinSymbol = "USDM" | "cEUR" | "cREAL" | "USDC";
+export type StablecoinSymbol = "USDM" | "cEUR" | "cREAL" | "USDC" | "cNGN" | "USAT";
 
 interface StablecoinConfig {
   symbol: StablecoinSymbol;
@@ -60,6 +60,34 @@ export const STABLECOINS: StablecoinConfig[] = [
     addresses: {
       [celo.id]: "0xcebA9300f2b948710d2653dD7B07f33A8B32118C",
       [celoSepolia.id]: "0x01C5C0122039549AD1493B8220cABEdD739BC44E",
+    },
+  },
+  {
+    // Africa Stablecoin Consortium's regulated Naira stablecoin, launched on
+    // Celo Mainnet 2026-08-07. Verified 2026-08-09 against Celo's official
+    // token-addresses docs and cross-checked live on Blockscout (symbol
+    // "cNGN", 6 decimals). Mainnet-only — no Celo Sepolia deployment exists.
+    // As of verification this token had 7 holders and zero DeFi liquidity
+    // anywhere on Celo (see the cNGN entry omission in lib/protocols).
+    symbol: "cNGN",
+    name: "cNGN",
+    decimals: 6,
+    addresses: {
+      [celo.id]: "0xF6829D7393dAe24509eb1E52eE8e572e2E271a4f",
+    },
+  },
+  {
+    // Tether's GENIUS Act-compliant, Anchorage Digital Bank-issued USD
+    // stablecoin ("USA₮"). Launched on Celo Mainnet 2026-07-29 as USAT's
+    // first deployment beyond Ethereum. Verified 2026-08-09 against Celo's
+    // official token-addresses docs and cross-checked live on Blockscout
+    // (symbol "USAT", 6 decimals). Mainnet-only — no Celo Sepolia deployment
+    // exists.
+    symbol: "USAT",
+    name: "Tether America USD",
+    decimals: 6,
+    addresses: {
+      [celo.id]: "0xD2ab3C9A02DBBAB236BfEC45D1d755DF4267F771",
     },
   },
 ];

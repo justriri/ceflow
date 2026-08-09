@@ -9,6 +9,8 @@ const TOKEN_STYLES: Record<string, string> = {
   cEUR: "bg-[rgba(96,165,250,0.12)] text-[#60a5fa]",
   cREAL: "bg-[rgba(45,212,191,0.12)] text-[#2dd4bf]",
   USDC: "bg-[rgba(129,140,248,0.12)] text-[#818cf8]",
+  cNGN: "bg-[rgba(74,222,128,0.12)] text-[#4ade80]",
+  USAT: "bg-[rgba(251,191,36,0.12)] text-[#fbbf24]",
 };
 
 interface BalanceRowProps {
